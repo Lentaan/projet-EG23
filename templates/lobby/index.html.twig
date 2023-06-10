@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}WGUTT | Lobby{% endblock %}
+
+{% block body %}
+    <dialog id="create-lobby" class="modal">
+        <header class="title-modal">
+            <h1>Créer un lobby</h1>
+        </header>
+        {{ form_start(form) }}
+        <section>
+            <div class="fields">
+                <div class="field">
+                    {{ form_widget(form.name) }}
+                    {{ form_label(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                <div class="select-group">
+                    {{ form_widget(form.speciality) }}
+                    {{ form_label(form.speciality) }}
+                    {{ form_errors(form.speciality) }}
+                </div>
+
+            </div>
+            <div class="btn-group">
+                {{ form_widget(form.save) }}
+                <button id="cancel-create-lobby" class="btn-cancel">Annuler</button>
+            </div>
+        </section>
+        {{ form_end(form) }}
+    </dialog>
+    <dialog id="join-lobby" class="modal">
+        <header class="title-modal">
+            <h1>Rejoindre un lobby</h1>
+        </header>
+        {{ form_start(join) }}
+        <section>
+            <div class="fields">
+                <div class="field">
+                    {{ form_widget(join.name) }}
+                    {{ form_label(join.name) }}
+                    {{ form_errors(join.name) }}
+                </div>
+
+                <div class="select-group">
+                    {{ form_widget(join.speciality) }}
+                    {{ form_label(join.speciality) }}
+                    {{ form_errors(join.speciality) }}
+                </div>
+                {{ form_row(join.player_id) }}
+            </div>
+            <div class="btn-group">
+                {{ form_widget(join.save, {'label': 'Rejoindre'}) }}
+                <button id="cancel-join-lobby" class="btn-cancel">Annuler</button  >
+            </div>
+        </section>
+        {{ form_end(join) }}
+    </dialog>
+    <dialog id="load-lobby" class="modal">
+        <h2>Chargement de la partie ...</h2>
+    </dialog>
+    <section id="lobby">
+        <header>
+            <div class="field">
+                <input placeholder="Bubulle" id="search" name="search" type="text">
+                <label title="Rechercher" for="search">Rechercher</label>
+            </div>
+
+
+            <div style="align-self: end">
+                <button class="btn-cancel">Jouer seul</button>
+                <button id="open-create-lobby" class="btn-create">Créer un lobby</button>
+            </div>
+
+        </header>
+
+        <div class="lobby-table">
+            <div class="lobby-header">
+                <p>Nom</p>
+                <p>Branche</p>
+                <p></p>
+            </div>
+            {% for line in lobbies %}
+                {{ include('lobby/_line.html.twig') }}
+            {% endfor %}
+        </div>
+
+    </section>
+
+    <script>
+        const createButton = document.getElementById('open-create-lobby');
+        const createLobby = document.getElementById('create-lobby');
+        const joinLobby = document.getElementById('join-lobby');
+        const cancelCreateButton = document.getElementById('cancel-create-lobby');
+        const cancelJoinButton = document.getElementById('cancel-join-lobby');
+        const joinButtons = document.getElementsByClassName('btn-join');
+
+        console.log(joinButtons);
+        for (let i = 0; i < joinButtons.length; i++){
+            joinButtons[i].addEventListener('click', () => {
+                animOpen(joinLobby);
+            })
+        }
+        createButton.addEventListener('click', () => animOpen(createLobby));
+
+        createLobby.addEventListener('transitionend', () => {
+            createLobby.classList.remove('fade-in')
+        })
+        cancelCreateButton.addEventListener('click', () => {
+            createLobby.classList.add('fade-out');
+            setTimeout(() => createLobby.close(), 200);
+        });
+
+        joinLobby.addEventListener('transitionend', () => {
+            joinLobby.classList.remove('fade-in')
+        })
+        cancelJoinButton.addEventListener('click', () => {
+            joinLobby.classList.add('fade-out');
+            setTimeout(() => joinLobby.close(), 200);
+        });
+
+
+        createLobby.addEventListener('click', (event) => closeDialog(event, createLobby) );
+        joinLobby.addEventListener('click', (event) => closeDialog(event, joinLobby) );
+
+        function animOpen(lobby) {
+            lobby.classList.add('fade-out');
+            lobby.showModal();
+            lobby.classList.add('fade-in');
+            lobby.classList.remove('fade-out');
+        }
+
+        function closeDialog(event, lobby) {
+            if (event.target.nodeName === "SELECT" || event.target.nodeName === "OPTION") {
+                return;
+            }
+            const rect = lobby.getBoundingClientRect();
+            const isInDialog=((rect.top <= event.clientY && event.clientY <= rect.top + rect.height
+                && rect.left <= event.clientX && event.clientX <= rect.left + rect.width) || event.target.nodeName === "SELECT");
+            if (!isInDialog) {
+                lobby.classList.add('fade-out');
+                setTimeout(() => lobby.close(), 200);
+            }
+        }
+    </script>
+{% endblock %}

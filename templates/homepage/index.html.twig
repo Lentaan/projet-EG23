@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}War game à l'UTT{% endblock %}
+
+{% block body %}
+    <section class="start">
+        <h1 class="title-start" aria-label="War game à l'UTT" title="War game à l'UTT">
+            <img size="500" class="start-anim" src="{{ asset('assets/images/logo.png') }}" alt="WGUTT">
+            <img size="500" class="start-anim-end" src="{{ asset('assets/images/logo_long.png') }}" alt="WGUTT">
+        </h1>
+        {% if title %}
+            <h2>{{ title }}</h2>
+        {% endif %}
+        <a class="btn-emphasize" href="{{ path('lobby_list') }}">{{ button }}</a>
+    </section>
+{% endblock %}

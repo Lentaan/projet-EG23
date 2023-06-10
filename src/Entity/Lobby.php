@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Speciality;
 use App\Repository\LobbyRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -18,6 +19,21 @@ class Lobby
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
+
+    #[ORM\Column(type: "speciality", length: 255)]
+    private ?Speciality $speciality = null;
+
+    public function getSpeciality(): ?Speciality
+    {
+        return $this->speciality;
+    }
+
+    public function setSpeciality(Speciality $speciality): static
+    {
+        $this->speciality = $speciality;
+
+        return $this;
+    }
 
     public function getId(): ?int
     {

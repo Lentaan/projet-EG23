@@ -3,6 +3,7 @@
 namespace App\DoctrineType;
 
 use App\Enum\Speciality;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 class SpecialityType extends AbstractEnumType
 {
@@ -12,6 +13,7 @@ class SpecialityType extends AbstractEnumType
     {
         return Speciality::class;
     }
+
 
     public function getName(): string
     {

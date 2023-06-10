@@ -1,5 +1,9 @@
 doctrine:
     dbal:
+        types:
+            speciality: App\DoctrineType\SpecialityType
+            rank: App\DoctrineType\RankType
+            ai: App\DoctrineType\AiType
         url: '%env(resolve:DATABASE_URL)%'
 
         # IMPORTANT: You MUST configure your server version,

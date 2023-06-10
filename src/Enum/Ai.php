@@ -3,7 +3,7 @@
 namespace App\Enum;
 
 use JsonSerializable;
-enum TypeIA: string implements JsonSerializable
+enum Ai: string implements JsonSerializable
 {
     case SHIELDING = "Défensif";
     case STRIKING = "Attaquant";

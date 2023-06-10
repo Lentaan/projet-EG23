@@ -21,6 +21,6 @@ enum Rank implements JsonSerializable
 
     public function jsonSerialize(): string
     {
-        return $this->name();
+        return $this->getName();
     }
 }

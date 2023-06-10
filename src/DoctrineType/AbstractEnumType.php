@@ -9,7 +9,7 @@ abstract class AbstractEnumType extends Type
 {
     abstract public static function getEnumsClass(): string;
 
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return 'TEXT';
     }
@@ -18,6 +18,8 @@ abstract class AbstractEnumType extends Type
     {
         if ($value instanceof \BackedEnum) {
             return $value->value;
+        } elseif (true === enum_exists($this->getEnumsClass(), true)) {
+            return $value;
         }
         return null;
     }
