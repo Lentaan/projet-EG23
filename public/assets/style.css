@@ -12,6 +12,21 @@
   100% { translate: -10px 0; }
 }
 
+@keyframes color-card {
+  0% { background-color: #0a53be; filter: brightness(100%); scale: 1 }
+  33% { background-color: #2554D6;  }
+  50% { background-color: #2554D6; scale: 1.1 }
+  70% { background-color: #2554D6 }
+  100% { background-color: #0a53be; filter: brightness(100%); scale: 1 }
+}
+@keyframes color-card-active {
+  0% { background-color: #0a53be; scale: 1.3 }
+  33% { background-color: #2554D6; }
+  33% { background-color: #2554D6; scale: 1.4 }
+  70% { background-color: #2554D6 }
+  100% { background-color: #0a53be; scale: 1.3 }
+}
+
 @keyframes rotate-scale-up {
   0% {
     scale: 1;
@@ -20,7 +35,7 @@
     font-weight: inherit;
   }
   50% {
-    scale: 2;
+    scale: 1.7;
     translate: 0 -10px;
     font-weight: 900;
     color: #FFD600;
@@ -29,6 +44,21 @@
     scale: 1;
     translate: 0 0;
     color: #FFF1A5;
+    font-weight: inherit;
+  }
+}
+
+@keyframes rotate-scale-up-active {
+  0% {
+    scale: 1;
+    font-weight: inherit;
+  }
+  50% {
+    scale: 1.4;
+    color: #FFD600;
+  }
+  100% {
+    scale: 1.3;
     font-weight: inherit;
   }
 }
@@ -247,7 +277,7 @@ section:last-of-type{
   display: flex;
   justify-content: space-between;
   width: 15%;
-  background-color: #2554D6;
+  background-color: #0a53be;
   padding: 5px;
   border-radius: 5px;
   filter: brightness(var(--slider--brightness, 100%));
@@ -360,11 +390,30 @@ form[name="soldier"]{
   justify-content: space-evenly;
 }
 
+.title-start {
+  position: relative;
+}
 
 .start-anim {
+  animation-iteration-count: 1;
+  animation-name: scale-disappear;
+  animation-play-state: cubic-bezier(0.1, -0.6, 0.2, 0);
+  animation-delay: 1s;
+  animation-duration: 200ms;
+  animation-fill-mode: forwards;
 }
 .start-anim-end {
-  display: none;
+  scale: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  animation-iteration-count: 1;
+  animation-name: scale-appear;
+  animation-play-state: cubic-bezier(0.1, -0.6, 0.2, 0);
+  animation-delay: 1.2s;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
 }
 
 .btn-emphasize {
@@ -696,7 +745,7 @@ section.battlefield:first-child {
 
 footer {
   display: flex;
-  padding: 10px;
+  padding: 10px 30px;
   justify-content: space-between;
   width: 100%;
   background-color: #273C74;
@@ -795,4 +844,90 @@ footer > div{
   text-align: center;
   align-items: center;
   gap: 20px
+}
+
+input[type="checkbox"]{
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 25px;
+  background-color: #FFE663;
+  left: 28%;
+  border-radius: 5px;
+}
+
+.field:hover input ~ .checkmark {
+  background-color: #FFD600;
+}
+
+.label-check:hover {
+  cursor: pointer;
+}
+
+.field input:checked ~ .checkmark {
+  background-color: #2554D6 ;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.field input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.field .checkmark:after {
+  left: 9px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid #FFD600;
+  border-width: 0 3px 3px 0;
+  rotate: 45deg;
+}
+
+.field {
+  position: relative;
+}
+
+.hi > p {
+  color: #FFE663 !important;
+}
+
+.mini-card:hover {
+  animation-duration: 1s;
+  animation-delay: 200ms;
+  animation-iteration-count: infinite;
+  animation-name: color-card;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.mini-card.active:hover {
+  animation-duration: 1s;
+  animation-delay: 200ms;
+  animation-iteration-count: infinite;
+  animation-name: color-card-active;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.active {
+  scale: 1.3;
+}
+
+.mini-card.point-bounce {
+  animation-name: rotate-scale-up-active;
+  animation-fill-mode: both;
+  animation-duration: 250ms;
 }

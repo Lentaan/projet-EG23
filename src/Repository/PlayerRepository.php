@@ -39,6 +39,12 @@ class PlayerRepository extends ServiceEntityRepository
         }
     }
 
+    public function removeAll(): void
+    {
+        $q = $this->createQueryBuilder('s');
+        $q->delete()->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return Player[] Returns an array of Player objects
 //     */

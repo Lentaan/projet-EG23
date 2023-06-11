@@ -39,6 +39,13 @@ class GameRepository extends ServiceEntityRepository
         }
     }
 
+
+    public function removeAll(): void
+    {
+        $q = $this->createQueryBuilder('s');
+        $q->delete()->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return Game[] Returns an array of Game objects
 //     */

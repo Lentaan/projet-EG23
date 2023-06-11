@@ -29,12 +29,16 @@ class Player
     #[ORM\OneToMany(mappedBy: 'player', targetEntity: Soldier::class)]
     private Collection $soldiers;
 
+    #[ORM\OneToMany(mappedBy: 'controllingPlayer', targetEntity: ZoneControl::class)]
+    private Collection $zoneControls;
+
     #[ORM\ManyToOne(inversedBy: 'players')]
     private ?Game $game = null;
 
     public function __construct()
     {
         $this->soldiers = new ArrayCollection();
+        $this->zoneControls = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,6 +109,35 @@ class Player
 
         return $this;
     }
+/**
+     * @return Collection<int, ZoneControl>
+     */
+    public function getZoneControls(): Collection
+    {
+        return $this->zoneControls;
+    }
+
+    public function addZoneControl(ZoneControl $zoneControl): static
+    {
+        if (!$this->zoneControls->contains($zoneControl)) {
+            $this->zoneControls->add($zoneControl);
+            $zoneControl->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeZoneControl(ZoneControl $zoneControl): static
+    {
+        if ($this->zoneControls->removeElement($zoneControl)) {
+            // set the owning side to null (unless already changed)
+            if ($zoneControl->getPlayer() === $this) {
+                $zoneControl->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
 
     public function getGame(): ?Game
     {
@@ -121,5 +154,15 @@ class Player
     public function getNbReservedSoldier() {
         /* @var $i Soldier */
         return $this->getSoldiers()->reduce(fn ($c,$i) => ($i->isIsReserved() ? $c + 1: $c), 0);
+    }
+    public function getNbDead() {
+        /* @var $i Soldier */
+        return $this->getSoldiers()->reduce(fn ($c,$i) => ($i->isIsDead() ? $c + 1: $c), 0);
+    }
+
+    public function getNoZonesSoldiers()
+    {
+        /* @var $p Soldier */
+        return $this->getSoldiers()->filter(fn ($p) => $p->getZoneControl() !== null);
     }
 }

@@ -38,6 +38,11 @@ class SoldierRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    public function removeAll(): void
+    {
+        $q = $this->createQueryBuilder('s');
+        $q->delete()->getQuery()->getResult();
+    }
 
 //    /**
 //     * @return Soldier[] Returns an array of Soldier objects

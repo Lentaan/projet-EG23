@@ -63,6 +63,9 @@ class Soldier
     #[ORM\ManyToOne(inversedBy: 'soldiersPlayer1')]
     private ?ZoneControl $zoneControl = null;
 
+    #[ORM\Column]
+    private ?bool $isDead = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -261,6 +264,18 @@ class Soldier
     public function setZoneControl(?ZoneControl $zoneControl): static
     {
         $this->zoneControl = $zoneControl;
+
+        return $this;
+    }
+
+    public function isIsDead(): ?bool
+    {
+        return $this->isDead;
+    }
+
+    public function setIsDead(bool $isDead): static
+    {
+        $this->isDead = $isDead;
 
         return $this;
     }

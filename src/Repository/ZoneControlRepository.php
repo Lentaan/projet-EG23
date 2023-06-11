@@ -39,6 +39,13 @@ class ZoneControlRepository extends ServiceEntityRepository
         }
     }
 
+
+    public function removeAll(): void
+    {
+        $q = $this->createQueryBuilder('s');
+        $q->delete()->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return ZoneControl[] Returns an array of ZoneControl objects
 //     */

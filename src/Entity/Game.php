@@ -94,7 +94,7 @@ class Game
         return $this;
     }
 
-    public function getNbZoneControlled(PLayer $player) {
+    public function getNbZoneControlled(Player $player) {
         /* @var ZoneControl $i */
         return $this->getZoneControls()->reduce(fn ($c,$i) => ($i->isIsControlled() && ($player === $i->getControllingPlayer())) ? $c + 1 : $c, 0);
     }
@@ -102,5 +102,17 @@ class Game
     public function getNbSoldiersPlaced() {
         /* @var ZoneControl $i */
         return $this->getZoneControls()->reduce(fn ($c,$i) => $c + $i->getSoldiersPlayer1()->count(), 0);
+    }
+
+
+    public function getUncontrolledZones(Player $player) {
+        /* @var ZoneControl $p */
+        return $this->getZoneControls()->filter(fn ($p) => !$p->isIsControlled());
+    }
+
+
+    public function getNoSoldierZones(Player $player) {
+        /* @var ZoneControl $p */
+        return $this->getZoneControls()->filter(fn ($p) => !!$p->getSoldiersPlayer1()->count());
     }
 }

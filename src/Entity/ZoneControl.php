@@ -31,7 +31,7 @@ class ZoneControl
     #[ORM\Column]
     private ?bool $isControlled = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'zoneControls')]
     private ?Player $controllingPlayer = null;
 
     public function __construct()
@@ -53,6 +53,17 @@ class ZoneControl
     public function setGame(?Game $game): static
     {
         $this->game = $game;
+
+        return $this;
+    }
+    public function getPlayer(): ?Player
+    {
+        return $this->controllingPlayer;
+    }
+
+    public function setPlayer(?Player $player): static
+    {
+        $this->controllingPlayer = $player;
 
         return $this;
     }
@@ -149,5 +160,18 @@ class ZoneControl
     public function setZone(?Zone $zone): void
     {
         $this->zone = $zone;
+    }
+
+    public function removeAll() : static
+    {
+        foreach ($this->soldiersPlayer1 as $soldier) {
+            $this->soldiersPlayer1->removeElement($soldier);
+            if ($soldier->getZoneControl() === $this) {
+                $soldier->setIsDead(true);
+                $soldier->setZoneControl(null);
+            }
+        }
+
+        return $this;
     }
 }

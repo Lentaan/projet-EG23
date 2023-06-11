@@ -9,7 +9,10 @@ use App\Entity\ZoneControl;
 use App\Enum\Rank;
 use App\Enum\Speciality;
 use App\Enum\Zone;
+use App\Repository\GameRepository;
 use App\Repository\PlayerRepository;
+use App\Repository\SoldierRepository;
+use App\Repository\ZoneControlRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -42,7 +45,7 @@ class GameController extends AbstractController
     #[Route('/distribution-de-points', name: 'select')]
     public function index(PlayerRepository $player_repository, EntityManagerInterface $entity_manager): Response
     {
-        $player = $player_repository->find(1);
+        $player = $player_repository->findOneBy(['name' => 'Player1']);
         if ($player->getSoldiers()->count() === 0) {
             for ($i = 0; $i < 20; $i++) {
                 $soldier = new Soldier();
@@ -92,19 +95,20 @@ class GameController extends AbstractController
     public function create(EntityManagerInterface $entity_manager): Response
     {
         $player = new Player();
+        $player2 = new Player();
         $player->setName('Player1');
+        $player2->setName('Player2');
         $player->setSpeciality(Speciality::ISI);
+        $player2->setSpeciality(Speciality::GM);
 
         $entity_manager->persist($player);
+        $entity_manager->persist($player2);
         $entity_manager->flush();
 
         return $this->redirectToRoute('game_select');
     }
 
-    #[Route('/champs-de-bataille', name: 'battlefield')]
-    public function battlefield(PlayerRepository $player_repository, EntityManagerInterface $entity_manager): Response
-    {
-        $player = $player_repository->find(1);
+    public function samplePoints(Player $player, $entity_manager) {
         if ($player->getTotalPoints() > 0){
             foreach ($player->getSoldiers() as $index => $soldier) {
                 if (in_array($index, range(0,3))) {
@@ -139,8 +143,24 @@ class GameController extends AbstractController
                 $entity_manager->persist($soldier);
             }
         }
+    }
+
+    #[Route('/champs-de-bataille', name: 'battlefield')]
+    public function battlefield(
+      PlayerRepository $player_repository,
+      GameRepository $game_repository,
+      ZoneControlRepository $zone_control_repository,
+      SoldierRepository $soldier_repository,
+      EntityManagerInterface $entity_manager): Response
+    {
+        $player = $player_repository->findOneBy(['name' => 'Player1']);
+        $player2 = $player_repository->findOneBy(['name' => 'Player2']);
+        $this->samplePoints($player, $entity_manager);
+        $this->samplePoints($player2, $entity_manager);
         $player->setTotalPoints(0);
+        $player2->setTotalPoints(0);
         $entity_manager->persist($player);
+        $entity_manager->persist($player2);
         $entity_manager->flush();
 
         if ($player->getGame() === null) {
@@ -154,12 +174,108 @@ class GameController extends AbstractController
             }
 
             $game->addPlayer($player);
-            $player2 = clone $player;
             $player->setGame($game);
+            $player2->setGame($game);
             $entity_manager->persist($player2);
             $game->addPlayer($player2);
             $entity_manager->persist($game);
             $entity_manager->flush();
+        }
+
+        if (isset($_GET['sim']) && $_GET['sim'] === '1') {
+
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '2') {
+            $zoneControls = $player->getGame()->getZoneControls();
+            $zoneControl = $zoneControls->first();
+            if ($zoneControl) {
+                $index = 0;
+                foreach ($player->getSoldiers() as $soldier) {
+                    if (!$soldier->isIsReserved()){
+                        if ($index % 3 === 0 && $index !== 0) {
+                            $zoneControl = $zoneControls->next();
+                        }
+                        if ($zoneControl) {
+                            $zoneControl->addSoldiersPlayer1($soldier);
+                            $index++;
+                            if ($zoneControl->getZone()->name === 'BDE') {
+                                $zoneControl->setIsControlled(true);
+                                $zoneControl->setControllingPlayer($player);
+                                $zoneControl->removeSoldiersPlayer1($soldier);
+                                if ($index % 3 === 0){
+                                    $soldier->setIsDead(true);
+                                    $entity_manager->persist($soldier);
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    } else {
+                        $soldier->setIsReserved(false);
+                        $entity_manager->persist($soldier);
+                    }
+                    $entity_manager->persist($zoneControl);
+                }
+                $entity_manager->flush();
+            }
+
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '3') {
+            $zoneControls = $player->getGame()->getNoSoldierZones($player);
+            $soldiers = $player->getNoZonesSoldiers();
+            $soldier = $soldiers->first();
+            foreach ($zoneControls as $zoneControl2) {
+                $zoneControl2->addSoldiersPlayer1($soldier);
+                $soldier->setZoneControl($zoneControl2);
+                $soldier = $soldiers->next();
+                $entity_manager->persist($zoneControl2);
+                $entity_manager->persist($soldier);
+            }
+            $zoneControls = $player->getGame()->getUncontrolledZones($player);
+            /* @var ZoneControl $zoneControl */
+            $zoneControl = $zoneControls->first();
+            if($zoneControl) {
+                $zoneControl->setIsControlled(true);
+                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->first());
+                $zoneControl->removeAll();
+                $entity_manager->persist($zoneControl);
+                $entity_manager->flush();
+            }
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '4') {
+            $zoneControls = $player->getGame()->getUncontrolledZones($player);
+            /* @var ZoneControl $zoneControl */
+            $zoneControl = $zoneControls->first();
+            if($zoneControl){
+                $zoneControl->setIsControlled(true);
+                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
+                $entity_manager->persist($zoneControl);
+                $entity_manager->flush();
+            }
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '5') {
+            $zoneControls = $player->getGame()->getUncontrolledZones($player);
+            /* @var ZoneControl $zoneControl */
+            $zoneControl = $zoneControls->first();
+            if($zoneControl){
+                $zoneControl->setIsControlled(true);
+                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
+                $entity_manager->persist($zoneControl);
+                $entity_manager->flush();
+            }
+
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '6') {
+            $soldier_repository->removeAll();
+            $zone_control_repository->removeAll();
+            $player_repository->removeAll();
+            $game_repository->removeAll();
+            return $this->redirectToRoute('win');
         }
 
 
@@ -167,7 +283,9 @@ class GameController extends AbstractController
             'controller_name' => 'GameController',
             'game' => $player->getGame(),
             'soldiers' => $player->getSoldiers(),
-            'nbSoldiers' => Game::MAX_SOLDIER - ( $player->getNbReservedSoldier() + $player->getGame()->getNbSoldiersPlaced())
+            'nbSoldiers' => Game::MAX_SOLDIER - ( $player->getNbReservedSoldier() + $player->getGame()->getNbSoldiersPlaced() + $player->getNbDead()),
+            'mov' => isset($_GET['mov']) ? $_GET['mov'] + 1 : (isset($_GET['sim']) ? $_GET['sim'] + 1 : 1),
+            'is_sim' => isset($_GET['sim'])
         ]);
     }
 }
