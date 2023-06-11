@@ -16,46 +16,52 @@ class Soldier
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $strength = null;
+    private int $strength = 0;
 
     #[ORM\Column]
-    private ?int $dexterity = null;
+    private int $dexterity = 0;
 
     #[ORM\Column]
-    private ?int $constitution = null;
+    private int $constitution = 0;
 
     #[ORM\Column]
-    private ?int $initiative = null;
+    private int $initiative = 0;
 
     #[ORM\Column]
-    private ?int $resistance = null;
+    private int $resistance = 0;
 
     #[ORM\Column]
-    private ?int $damage = null;
+    private int $damage = 0;
 
     #[ORM\Column]
-    private ?int $escape = null;
+    private int $escape = 0;
 
     #[ORM\Column]
-    private ?int $heal = null;
+    private int $heal = 0;
 
     #[ORM\Column]
-    private ?int $life = null;
+    private int $life = 30;
 
     #[ORM\Column]
-    private ?int $shield = null;
+    private int $shield = 0;
 
     #[ORM\Column]
-    private ?int $precision = null;
+    private int $precision = 0;
 
     #[ORM\Column]
-    private ?bool $isReserved = null;
+    private bool $isReserved = false;
 
     #[ORM\Column(type: "ai", length: 255)]
-    private ?Ai $ai = null;
+    private Ai $ai = Ai::RANDOM;
     
     #[ORM\Column(type: "rank", length: 255)]
-    private ?Rank $rank = null;
+    private Rank $rank = Rank::NOOB;
+
+    #[ORM\ManyToOne(inversedBy: 'soldiers')]
+    private ?Player $player = null;
+
+    #[ORM\ManyToOne(inversedBy: 'soldiersPlayer1')]
+    private ?ZoneControl $zoneControl = null;
 
     public function getId(): ?int
     {
@@ -226,6 +232,35 @@ class Soldier
     public function setRank(Rank $rank): static
     {
         $this->rank = $rank;
+
+        return $this;
+    }
+
+    public function getPlayer(): ?Player
+    {
+        return $this->player;
+    }
+
+    public function setPlayer(?Player $player): static
+    {
+        $this->player = $player;
+
+        return $this;
+    }
+
+    public function getTotalPoints(): int
+    {
+        return $this->getStrength() + $this->getDexterity() + $this->getResistance() + $this->getConstitution() + $this->getInitiative();
+    }
+
+    public function getZoneControl(): ?ZoneControl
+    {
+        return $this->zoneControl;
+    }
+
+    public function setZoneControl(?ZoneControl $zoneControl): static
+    {
+        $this->zoneControl = $zoneControl;
 
         return $this;
     }

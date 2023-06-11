@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+{% block nav %}
+    {{ parent() }}
+    <a href="{{ path('lobby_list') }}">Abandonner</a>
+{% endblock %}
+
+{% block body %}
+    <section class="battlefield">
+        {% for zoneControl in game.zoneControls %}
+            <div data-zone="{{ zoneControl.zone.name }}" data-name="{{ zoneControl.zone.value }}" class="{{ zoneControl.zone.name }}_zone zone">
+                <img src="{{ asset('assets/images/library.svg') }}" alt="{{ zoneControl.zone.value }}">
+                <p> {{ zoneControl.zone.value }} <br> <span class="nb-unite">{{ zoneControl.soldiersPlayer1.count }}</span> unités</p>
+            </div>
+        {% endfor %}
+    </section>
+    <dialog id="slider-soldiers" class="modal">
+        <header class="title-modal">
+            <h1>Affecter des soldats | <span class="zone-name"></span></h1>
+        </header>
+        <section class="soldier-action">
+            <p><span class="nb-in-zone">0</span> soldats ont été sélectionnés !</p>
+            <button id="assign-soldiers" class="btn-create">Affecter !</button>
+        </section>
+        <section>
+            <button class="arrow-left"><img width="70" src="{{ asset('assets/images/left_arrow.svg') }}" alt="Go Left !">
+            </button>
+            <div class="slider">
+                {% for soldier in soldiers %}
+                    <div data-card-index='{{ loop.index }}' class='mini-card {{ soldier.isReserved?'reserved':'' }} {% if loop.index == 1 %}active{% endif %}'>
+                        <div class='stat-left'>
+                            <p><img alt='' width='10' src='{{ asset('assets/images/plus.svg') }}'> <span
+                                        class='points'>{{ soldier.totalPoints }}</span>p
+                            </p>
+                        </div>
+                        <img class='img-rank' width='70' height='70' src='{{ asset('assets/images/'~soldier.rank.name|lower~'_yellow.png') }}'
+                             alt='{{ soldier.rank.getName }}'/>
+                        <div class='stat-right'>
+                            <p><img alt='' width='10' src='{{ asset('assets/images/plus.svg') }}'><span
+                                        class='points'>{{ soldier.totalPoints }}</span>p
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button class="arrow-right"><img width="70" src="{{ asset('assets/images/right_arrow.svg') }}" alt="Go right !">
+            </button>
+        </section>
+    </dialog>
+    <footer>
+        <div>
+            <p>
+                Il vous reste <span class="nb-soldier">{{ nbSoldiers }}</span> unités à placer
+            </p>
+
+            <p class="small">
+                {% for zoneControl in game.zoneControls %}
+                    <span class="{{ zoneControl.zone.name }}">La zone {{ zoneControl.zone.value }} n'a pas d'unité ! |</span>
+                {% endfor %}
+            </p>
+        </div>
+
+        <div>
+            <p>
+                <img src="{{ asset('assets/images/rectangle_orange.svg') }}" alt="rectangle_orange">
+                Zone hostile
+            </p>
+            <p>
+                <img src="{{ asset('assets/images/rectangle_bleu.svg') }}" alt="rectangle_bleu">
+                Zone contrôlée
+            </p>
+            <p>
+                <img src="{{ asset('assets/images/rectangle_beige.svg') }}" alt="rectangle_bleu">
+                Zone neutre
+            </p>
+        </div>
+
+        <button id="validate-battle" title="Vous devez d'abord placer toutes vos unités" disabled class="btn-create">
+            Valider le plan de bataille
+        </button>
+    </footer>
+    <script>
+        let zones = document.getElementsByClassName('zone');
+        let dialogSoldier = document.getElementById('slider-soldiers');
+        let btnDialogSoldier = document.getElementById('assign-soldiers');
+
+        const radiusX = document.body.offsetWidth / 2;
+        const radiusY = document.body.offsetHeight / 2;
+        let cardOffset = 2;
+        const miniCards = document.querySelectorAll('.mini-card');
+        let minus = 0;
+
+        function activeCard(cardIndex) {
+            let zone = dialogSoldier.dataset.zone
+            let length = miniCards.length - minus
+            let midLength = Math.ceil(length / 2);
+            let minusNon = 0;
+            miniCards.forEach(function (card, i) {
+                let trueIndex = i - minusNon + 1
+                let index = (trueIndex >= cardIndex) ? midLength - (trueIndex - cardIndex) : midLength - (cardIndex - trueIndex);
+                let indexDeg = (trueIndex >= cardIndex) ? midLength + (trueIndex - cardIndex) : midLength - (cardIndex - trueIndex);
+                card.classList.remove('active');
+                if (!card.classList.contains('reserved') && !(card.classList.contains('assign') && card.dataset.zone !== zone)) {
+                    card.style.display = 'flex';
+                    let deg = (indexDeg * (180 / length) - 180);
+                    if (trueIndex === cardIndex) {
+                        card.classList.add('point-bounce');
+                        card.classList.add('active');
+                        card.style.zIndex = index + 1
+                    }
+                    card.style.zIndex = index;
+                    let bright = 100 - length * 4 + index * 4;
+                    card.style.setProperty("--slider--brightness", ((bright >= 20) ? bright : 20) + "%");
+                    card.style.setProperty("--slider--left", (Math.round((radiusX - 550 + length * 10) * Math.cos(deg * (Math.PI / 180))) + 550 - length * 10) + "px");
+                    card.style.setProperty("--slider--top", (Math.round((radiusY * 0.8 - 350) * Math.sin(deg * (Math.PI / 180))) ) + "px");
+                } else {
+                    minusNon++;
+                }
+
+            })
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            miniCards.forEach(function (card) {
+                card.addEventListener('animationend', function (ev) {
+                    ev.currentTarget.classList.remove('point-bounce')
+                })
+            })
+
+            document.querySelector(".arrow-right").addEventListener('click', function () {
+                if (cardOffset < (20-minus)) {
+                    cardOffset += 1;
+                    activeCard(cardOffset);
+                }
+            })
+
+            document.querySelector(".arrow-left").addEventListener('click', function () {
+                if (cardOffset > 1) {
+                    cardOffset -= 1;
+                    activeCard(cardOffset);
+                }
+            })
+
+            for(let i = 0; i < zones.length; i++) {
+                zones[i].addEventListener('click', function (e) {
+                    let zone = dialogSoldier.dataset.zone = e.currentTarget.dataset.zone
+                    document.querySelector('#slider-soldiers .zone-name').innerHTML = e.currentTarget.dataset.name
+                    minus = 0;
+                    miniCards.forEach(function (card, index) {
+                        if (card.classList.contains('reserved') || (card.classList.contains('assign') && card.dataset.zone !== zone)) {
+                            card.style.display = 'none';
+                            minus++;
+                        } else {
+                            card.dataset.cardIndex = index - minus + 1;
+                        }
+                    });
+                    animOpen(dialogSoldier);
+                    activeCard(1);
+                })
+            }
+
+            btnDialogSoldier.addEventListener('click', function (el) {
+                let zone = dialogSoldier.dataset.zone;
+                if (zone) {
+                    let nb = document.querySelectorAll('#slider-soldiers .assign[data-zone='+zone+']').length
+                    let bubble = document.querySelector('.'+zone+'_zone .nb-unite')
+                    bubble.innerHTML = nb.toString();
+                    let noSoldier = document.querySelector('p.small .'+zone+'')
+                    if (nb > 0) {
+                        noSoldier.classList.add('hidden');
+                    } else {
+                        noSoldier.classList.remove('hidden');
+                    }
+                }
+                let nbSoldiers = document.querySelectorAll('.mini-card:not(.assign):not(.reserved)').length
+                document.querySelector('.nb-soldier').innerHTML = nbSoldiers
+                if (nbSoldiers <= 0 && document.querySelector('.small > span:not(.hidden)') === null) {
+                    let btn = document.getElementById('validate-battle');
+                    btn.disabled = false;
+                }
+                dialogSoldier.close();
+                let nb = document.querySelector('.nb-in-zone')
+                nb.innerHTML = 0;
+            })
+
+            dialogSoldier.classList.add('hidden');
+            dialogSoldier.showModal();
+            dialogSoldier.addEventListener('click', (event) => closeDialog(event, dialogSoldier) );
+
+            activeCard(cardOffset);
+            dialogSoldier.close();
+            dialogSoldier.classList.remove('hidden');
+
+            document.querySelectorAll(".mini-card").forEach(function (el) {
+                el.addEventListener('click', function (ev) {
+                    if (ev.currentTarget.classList.contains('active')) {
+                        let aah = ev.currentTarget.classList.toggle('assign');
+                        let nb = document.querySelector('.nb-in-zone')
+                        nb.innerHTML = aah ? Number(nb.innerHTML) + 1 : Number(nb.innerHTML) - 1;
+                        ev.currentTarget.dataset.zone = dialogSoldier.dataset.zone
+                    }
+                    activeCard(Number(ev.currentTarget.dataset.cardIndex))
+                    cardOffset = Number(ev.currentTarget.dataset.cardIndex)
+                })
+                el.addEventListener('hover', function (ev) {
+
+                })
+            })
+
+            function animOpen(lobby) {
+                lobby.classList.add('fade-out');
+                lobby.showModal();
+                lobby.classList.add('fade-in');
+                lobby.classList.remove('fade-out');
+            }
+
+            function closeDialog(event, lobby) {
+                if (event.target.nodeName === "SELECT" || event.target.nodeName === "OPTION") {
+                    return;
+                }
+                const rect = lobby.getBoundingClientRect();
+                const isInDialog=((rect.top <= event.clientY && event.clientY <= rect.top + rect.height
+                    && rect.left <= event.clientX && event.clientX <= rect.left + rect.width) || event.target.nodeName === "SELECT");
+                if (!isInDialog) {
+                    lobby.classList.add('fade-out');
+                    setTimeout(() => lobby.close(), 200);
+                }
+            }
+
+        });
+    </script>
+{% endblock %}

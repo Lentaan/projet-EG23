@@ -49,6 +49,7 @@
   margin: 0;
   box-sizing: border-box;
   scrollbar-color: #FFE663 #202C4D;
+  letter-spacing: 1px;
 }
 
 body {
@@ -70,6 +71,9 @@ header {
 }
 
 nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   width: 100%;
   display: flex;
   background-color: #273C74;
@@ -92,6 +96,10 @@ nav a:not(.brand) {
   color: #273C74;
   text-decoration: none;
   font-size: 20px;
+}
+
+.hidden {
+  display: none;
 }
 
 main {
@@ -245,7 +253,7 @@ section:last-of-type{
   filter: brightness(var(--slider--brightness, 100%));
   font-size: 12px;
   min-height: 200px;
-
+  cursor: pointer;
 }
 
 input[type=range] {
@@ -260,6 +268,7 @@ input[type=range]::-webkit-slider-thumb {
 
 input[type=range]:focus {
   outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+
 }
 
 input[type=range]::-ms-track {
@@ -279,6 +288,10 @@ input[type=range]::-moz-range-thumb {
   border-radius: 50%;
   background: #FFD600;
   cursor: pointer;
+}
+
+input[type=range]:focus::-moz-range-thumb {
+  background: #974700;
 }
 
 input[type=range]::-moz-range-track {
@@ -343,35 +356,15 @@ form[name="soldier"]{
 .start:first-child {
   flex-direction: column;
   align-items: center;
-  gap: 5em;
+  gap: 3em;
   justify-content: space-evenly;
-  margin: 0;
 }
 
-.title-start {
-  position: relative;
-}
 
 .start-anim {
-  animation-iteration-count: 1;
-  animation-name: scale-disappear;
-  animation-play-state: cubic-bezier(0.1, -0.6, 0.2, 0);
-  animation-delay: 1s;
-  animation-duration: 200ms;
-  animation-fill-mode: forwards;
 }
 .start-anim-end {
-  scale: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  animation-iteration-count: 1;
-  animation-name: scale-appear;
-  animation-play-state: cubic-bezier(0.1, -0.6, 0.2, 0);
-  animation-delay: 1.2s;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
+  display: none;
 }
 
 .btn-emphasize {
@@ -387,6 +380,11 @@ form[name="soldier"]{
   letter-spacing: 12px;
 }
 
+.points-form {
+  display: flex;
+  flex-direction: column;
+}
+
 .btn-create {
   background-color: #2554D6;
   border-radius: 10px;
@@ -395,6 +393,40 @@ form[name="soldier"]{
   font-weight: 500;
   letter-spacing: 2px;
   font-size: 1em;
+}
+
+.btn-create:disabled {
+  color: #273C74;
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #974700;
+  text-decoration: none;
+  text-align: center;
+  padding: 20px;
+  color: #FFF1A5;
+  border-radius: 10px;
+  font-weight: bolder;
+  font-size: 1.2em;
+  margin-top: 5px;
+  width: 50%;
+}
+
+.btn-secondary:disabled {
+  opacity: 50%;
+  background-color: #974700;
+  color: #121724;
+  cursor: not-allowed;
+}
+
+.points-form > p {
+  align-self: flex-end;
+  display: flex;
+  width: 100%;
+  padding: 10px;
+  gap: 10px;
 }
 
 #lobby {
@@ -467,7 +499,7 @@ form[name="soldier"]{
   letter-spacing: 2px;
 }
 
-.field {
+#lobby .field, dialog .field {
   display: flex;
   flex-flow: column-reverse;
 }
@@ -478,7 +510,7 @@ label, input {
 }
 
 
-input {
+#lobby input, dialog input{
   font-size: 1em;
   border: none;
   border-radius: 10px;
@@ -490,8 +522,8 @@ input {
   color: #E96E00;
 }
 
-input:focus, button:focus, a:focus, a:active {
-  outline: 2px solid #E96E00;
+button:focus, a:focus, a:active, input:focus, select:focus {
+  outline: 3px solid #E96E00;
 }
 
 .btn-cancel:focus, .line-lobby button:focus {
@@ -502,7 +534,7 @@ input:focus, button:focus, a:focus, a:active {
   outline-color: #273C74;
 }
 
-label {
+#lobby label, dialog label {
   text-align: right;
   width: 100%;
   letter-spacing: 2px;
@@ -638,4 +670,129 @@ dialog::backdrop {
   font-weight: 500;
   letter-spacing: 2px;
   font-size: 1em;
+  text-decoration: none;
+}
+
+.btn-minus:focus, .btn-plus:focus {
+  outline: none;
+}
+.btn-minus:focus img, .btn-plus:focus img {
+  border-bottom: 1px solid #FFF1A5;
+  padding-bottom: 2px;
+}
+
+section.battlefield:first-child {
+  position: relative;
+  height: calc(100vh - 205px);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-image: url("images/champ_bataille_carte.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  padding-bottom: calc(100vw - 45%);
+}
+
+footer {
+  display: flex;
+  padding: 10px;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #273C74;
+  align-items: center;
+  font-size: 1.2em;
+  position: fixed;
+  bottom: 0;
+}
+
+footer > div{
+  max-width: calc(100%/3);
+}
+
+.small {
+  padding: 10px;
+  background-color: #202C4D;
+  font-size: 0.5em;
+}
+
+.battlefield > div p {
+  position: absolute;
+  translate: -50% -50%;
+  top: 50%;
+  left: 50%;
+  color: #202C4D;
+  line-height: 2;
+}
+
+.battlefield > div {
+  text-align: center;
+  position: absolute;
+  cursor: pointer;
+  font-weight: bolder;
+}
+
+.HI_zone {
+  bottom: 5%;
+  right: 18%;
+}
+
+.LIBRARY_zone {
+  bottom: 7%;
+  left: 30%;
+}
+
+.BDE_zone {
+  top: 25%;
+  left: 22%;
+}
+
+.QA_zone {
+  top: 29%;
+  right: 30%;
+}
+.HS_zone {
+  top: 5%;
+  left: 2%;
+}
+
+.select-group.ai{
+  position: absolute;
+  bottom: 20px;
+  width: calc(100% - 40px);
+}
+
+
+
+#slider-soldiers section {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+
+#slider-soldiers {
+  width: 80%;
+  position: relative;
+}
+
+#slider-soldiers.hidden {
+  visibility: hidden;
+}
+
+.assign {
+  box-shadow: 0 2px 18px #FFE663;
+}
+
+#slider-soldiers section {
+  display: flex;
+  justify-content: center;
+}
+
+#slider-soldiers section.soldier-action {
+  flex-direction: column;
+  color: #FFD600;
+  text-align: center;
+  align-items: center;
+  gap: 20px
 }

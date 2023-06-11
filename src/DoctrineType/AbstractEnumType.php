@@ -17,9 +17,9 @@ abstract class AbstractEnumType extends Type
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if ($value instanceof \BackedEnum) {
-            return $value->value;
+            return (string) $value->value;
         } elseif (true === enum_exists($this->getEnumsClass(), true)) {
-            return $value;
+            return (string) $value;
         }
         return null;
     }

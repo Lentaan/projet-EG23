@@ -57,9 +57,6 @@
         </section>
         {{ form_end(join) }}
     </dialog>
-    <dialog id="load-lobby" class="modal">
-        <h2>Chargement de la partie ...</h2>
-    </dialog>
     <section id="lobby">
         <header>
             <div class="field">
@@ -69,7 +66,7 @@
 
 
             <div style="align-self: end">
-                <button class="btn-cancel">Jouer seul</button>
+                <a href="{{ path('game_create') }}" class="btn-cancel" >Jouer seul</a>
                 <button id="open-create-lobby" class="btn-create">Créer un lobby</button>
             </div>
 
@@ -99,6 +96,7 @@
         console.log(joinButtons);
         for (let i = 0; i < joinButtons.length; i++){
             joinButtons[i].addEventListener('click', () => {
+                document.getElementsByName('form[player_id]')[0].value = joinButtons[i].dataset.id;
                 animOpen(joinLobby);
             })
         }

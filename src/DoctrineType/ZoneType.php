@@ -2,15 +2,15 @@
 
 namespace App\DoctrineType;
 
-use App\Enum\Speciality;
+use App\Enum\Zone;
 
-class SpecialityType extends AbstractEnumType
+class ZoneType extends AbstractEnumType
 {
-    public const NAME = "speciality";
+    public const NAME = "zone";
 
     public static function getEnumsClass(): string
     {
-        return Speciality::class;
+        return Zone::class;
     }
 
 

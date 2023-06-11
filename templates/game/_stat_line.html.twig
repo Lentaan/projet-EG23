@@ -1,0 +1,9 @@
+<div>
+    <div class='stat-label'>
+        <img src='{{ asset("assets/images/icon_"~stat~".svg") }}' alt='{{ stat_translate }}' width='15'>
+        <p>{{ stat_translate }}</p>
+    </div>
+    <p>
+        <span class='{{ stat }}'>{{ points }}</span>{% if stat == 'life' %}p{% else %}%{% endif %}
+    </p>
+</div>

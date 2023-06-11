@@ -1,7 +1,287 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}{% endblock %}
+{% block nav %}
+    {{ parent() }}
+    <a href="{{ path('lobby_list') }}">Abandonner</a>
+{% endblock %}
 
 {% block body %}
+    <section>
+        <form name="soldier">
+            <div class="card">
+                <h2><button><img width='30' alt='Upgrade' src='{{ asset('assets/images/upgrade_arrow.svg') }}'></button> {{ rank_name }} (+<span class='points'>{{ first_soldier.totalPoints }}</span>p)</h2>
+                <img class="img-rank" src="{{ asset('assets/images/'~first_soldier.rank.name|lower~'_yellow.png') }}" alt="Noob" width="" height="">
+                <div class="select-group ai">
+                    <select name="ai">
+                        <option value="RANDOM">Aléatoire</option>
+                        <option value="STRIKING">Offensif</option>
+                        <option value="SHIELDING">Défensif</option>
+                    </select>
+                    <label for="ai">Choisir une IA</label>
+                </div>
+            </div>
+            <div class="points-form">
+                <h2>Il vous reste <span class='minus-points'>{{ total_points }}</span> points
+                    !</h2>
+                <div class="skills">
+                    <h3>Compétences</h3>
+                    {% for skill in skills %}
+                        {{ include('game/_skill_range_input.html.twig', {'points': attribute(first_soldier, skill), 'skill': skill, 'skill_translate': skills_translate[skill]}) }}
+                    {% endfor %}
+                </div>
+                <div class="stats">
+                    <h3>Statistiques</h3>
+                    {% for stat in stats %}
+                        {{ include('game/_stat_line.html.twig', {'points': attribute(first_soldier, stat), 'stat': stat, 'stat_translate': stats_translate[stat]}) }}
+                    {% endfor %}
+                </div>
+                <p>
+                    <a href="{{ path('game_battlefield') }}" title="Distribution automatique" class="btn-secondary">
+                        Distribution auto
+                    </a>
+                    <button disabled title="Vous devez utiliser tous vos points avant de continuer" class="btn-secondary">
+                        Prêt
+                        !
+                    </button>
+                </p>
 
+
+            </div>
+        </form>
+    </section>
+
+    <section>
+        <button class="arrow-left"><img width="70" src="{{ asset('assets/images/left_arrow.svg') }}" alt="Go Left !">
+        </button>
+        <div class="slider">
+            {% for soldier in soldiers %}
+                <div data-card-index='{{ loop.index }}' class='mini-card {% if loop.index == 1 %}active{% endif %}'>
+                    <div class='stat-left'>
+                        <p><img alt='' width='10' src='{{ asset('assets/images/plus.svg') }}'> <span
+                                    class='points'>{{ soldier.totalPoints }}</span>p
+                        </p>
+                    </div>
+                    <img class='img-rank' width='70' height='70' src='{{ asset('assets/images/'~soldier.rank.name|lower~'_yellow.png') }}'
+                         alt='{{ soldier.rank.getName }}'/>
+                    <div class='stat-right'>
+                        <p><img alt='' width='10' src='{{ asset('assets/images/plus.svg') }}'><span
+                                    class='points'>{{ soldier.totalPoints }}</span>p
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button class="arrow-right"><img width="70" src="{{ asset('assets/images/right_arrow.svg') }}" alt="Go right !">
+        </button>
+    </section>
+    <dialog id="load-game" class="modal">
+        <h2>Chargement de la partie ...</h2>
+    </dialog>
+    <script>
+        const slider = document.getElementsByClassName('slider')[0];
+        const radiusX = slider.offsetWidth / 2 - 100;
+        const radiusY = slider.offsetHeight / 2 - 50;
+        let cardOffset = 9;
+        const length = 20;
+        const miniCards = document.querySelectorAll('.mini-card');
+        const Skills = {
+            STR: 'strength',
+            DEX: 'dexterity',
+            CON: 'constitution',
+            RES: 'resistance',
+            INI: 'initiative'
+        };
+
+        function activeCard(offset) {
+            let midLength = miniCards.length / 2;
+            miniCards.forEach(function (card, index) {
+                index = index + offset;
+                if (card.classList.contains('active')) {
+                    let data = Object.fromEntries((new FormData(document.getElementsByName("soldier")[0]).entries()));
+                    saveActiveCard(card.dataset.cardIndex, 0, 0, data);
+                    card.classList.remove('active');
+                }
+                let deg = ((index + 1) * (180 / length) + 180);
+                if (deg >= 270) {
+                    card.style.zIndex = midLength - (index - midLength);
+                    if (deg === 270) {
+                        card.classList.add('point-bounce');
+                        card.classList.add('active');
+                        loadActiveCard(card.dataset.cardIndex, 0, 0);
+                        card.style.zIndex = midLength + 1
+                    }
+                    let bright = (100 - (index - midLength) * midLength);
+                    card.style.setProperty("--slider--brightness", ((bright >= 0) ? bright : 0) + "%");
+                } else {
+                    card.style.zIndex = index;
+                    let bright = (index * midLength);
+                    card.style.setProperty("--slider--brightness", ((bright >= 0) ? bright : 0) + "%");
+                }
+                card.style.setProperty("--slider--left", (Math.round(radiusX * Math.cos(deg * (Math.PI / 180))) + radiusX - card.offsetWidth / 2 + 100) + "px");
+                card.style.setProperty("--slider--top", (Math.round(radiusY * Math.sin(deg * (Math.PI / 180))) + radiusY - card.offsetHeight / 2 + 50) + "px");
+            })
+        }
+
+        async function loadActiveCard(index, idGame, idPlayer) {
+            /*const card = `card[index]=${index}&card[game]=${idGame}&card[player]=${idPlayer}`;
+            const soldierRequest = new Request(
+                `http://local.wargameutt.fr/views/card.php?action=get&${card}`,
+                {method: "GET"}
+            )
+            const response = await fetch(soldierRequest);
+            const json = await response.json();
+            const forms = document.querySelectorAll('form');
+            const form = forms[0];
+            console.log('LOAD JSON', json);
+            if (json.hasOwnProperty('error')) {
+                Array.from(form.elements).forEach((input) => {
+                    if (input.tagName === 'INPUT') {
+                        input.value = 0;
+                        input.dispatchEvent(new Event("input"));
+                    }
+                });
+            } else {
+                Array.from(form.elements).forEach((input) => {
+                    if (typeof json[input.name] !== "undefined") {
+                        input.value = json[input.name];
+                        console.log(input)
+                        console.log('LOAD, element array', json[input.name])
+                        input.dispatchEvent(new Event("input"));
+                    }
+                });
+            }*/
+        }
+
+        async function saveActiveCard(index, idGame, idPlayer, data) {
+            /*const newSoldier = {
+                card: {
+                    index: index,
+                    game: idGame,
+                    player: idPlayer
+                },
+                data: data
+            }
+            const response = await fetch("http://local.wargameutt.fr/views/card.php?action=save", {
+                method: "POST",
+                body: JSON.stringify(newSoldier),
+                headers: {"Content-type": "application/json"}
+            });
+            const json = await response.json();
+            console.log(response, json);*/
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            miniCards.forEach(function (card) {
+                card.addEventListener('animationend', function (ev) {
+                    ev.currentTarget.classList.remove('point-bounce')
+                })
+            })
+
+            document.querySelector(".arrow-left").addEventListener('click', function () {
+                if (cardOffset <= (length - 3) / 2) {
+                    cardOffset += 1;
+                    activeCard(cardOffset);
+                }
+            })
+
+            document.querySelector(".arrow-right").addEventListener('click', function () {
+                if (cardOffset >= -((length - 1) / 2)) {
+                    cardOffset -= 1;
+                    activeCard(cardOffset);
+                }
+            })
+
+            activeCard(cardOffset);
+
+            document.querySelectorAll('.btn-minus').forEach(function (el) {
+                el.addEventListener("click", function (ev) {
+                    let nextEl = ev.currentTarget.nextElementSibling
+                    nextEl.value = (nextEl.value > 0) ? Number(nextEl.value) - 1 : 0
+                    nextEl.dispatchEvent(new Event("input"));
+                })
+            })
+
+            document.querySelectorAll('.btn-plus').forEach(function (el) {
+                el.addEventListener("click", function (ev) {
+                    let prevEl = ev.currentTarget.previousElementSibling
+                    prevEl.value = (prevEl.value < 10) ? Number(prevEl.value) + 1 : 10
+                    prevEl.dispatchEvent(new Event("input"));
+                })
+            })
+
+            document.querySelectorAll('.form-range').forEach(function (el) {
+                el.addEventListener("input", function (ev) {
+                    let currTar = ev.currentTarget,
+                        diffVal = currTar.value - currTar.dataset.old,
+                        pointVal = currTar.parentElement.querySelector('.points'),
+                        pointsVals = document.querySelectorAll('.card .points, .mini-card.active .points'),
+                        minuspointVal = document.querySelector('.minus-points'),
+                        newEvent = new Event('points');
+                    pointsVals.forEach(function (el) {
+                        el.innerHTML = Number(el.innerHTML) + diffVal;
+                    })
+                    pointVal.innerHTML = Number(pointVal.innerHTML) + diffVal;
+                    minuspointVal.innerHTML = Number(minuspointVal.innerHTML) - diffVal;
+                    switch (currTar.name) {
+                        case Skills.STR:
+                            let damage = document.querySelector(".damage");
+                            damage.innerHTML = Number(damage.innerHTML) + (10 * diffVal);
+                            damage.parentElement.dispatchEvent(newEvent);
+                            break;
+                        case Skills.DEX:
+                            let precision = document.querySelector(".precision"),
+                                escape = document.querySelector(".escape"),
+                                heal = document.querySelector(".heal");
+                            precision.innerHTML = Number(precision.innerHTML) + (3 * diffVal);
+                            escape.innerHTML = Number(escape.innerHTML) + (3 * diffVal);
+                            heal.innerHTML = Number(heal.innerHTML) + (6 * diffVal);
+                            precision.parentElement.dispatchEvent(newEvent);
+                            escape.parentElement.dispatchEvent(newEvent);
+                            heal.parentElement.dispatchEvent(newEvent);
+                            break;
+                        case Skills.RES:
+                            let shield = document.querySelector(".shield");
+                            shield.innerHTML = Number(shield.innerHTML) + (5 * diffVal);
+                            shield.parentElement.dispatchEvent(newEvent);
+                            break;
+                        case Skills.CON:
+                            let life = document.querySelector(".life");
+                            life.innerHTML = Number(life.innerHTML) + (1 * diffVal);
+                            life.parentElement.dispatchEvent(newEvent);
+                            break;
+                        case Skills.INI:
+                            pointVal.parentElement.dispatchEvent(newEvent);
+                            break;
+                        default:
+                            break;
+                    }
+                    currTar.dataset.old = currTar.value;
+                })
+            })
+
+            document.querySelectorAll(".points, .minus-points, .stat-label + p, .skills > div > p > span").forEach(function (el) {
+                el.addEventListener('points', function (ev) {
+                    ev.currentTarget.classList.add('point-bounce')
+                })
+                el.addEventListener('animationend', function (ev) {
+                    ev.currentTarget.classList.remove('point-bounce')
+                })
+            })
+
+            document.querySelectorAll(".mini-card").forEach(function (el) {
+                el.addEventListener('click', function (ev) {
+                    activeCard(miniCards.length / 2 - Number(ev.currentTarget.dataset.cardIndex))
+                    cardOffset = miniCards.length / 2 - Number(ev.currentTarget.dataset.cardIndex);
+                })
+                el.addEventListener('hover', function (ev) {
+
+                })
+            })
+
+        });
+
+    </script>
 {% endblock %}

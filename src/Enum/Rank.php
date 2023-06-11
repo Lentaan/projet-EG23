@@ -4,11 +4,11 @@ namespace App\Enum;
 
 use JsonSerializable;
 
-enum Rank implements JsonSerializable
+enum Rank: int implements JsonSerializable
 {
-    case NOOB;
-    case ELITE;
-    case MASTER;
+    case NOOB = 0;
+    case ELITE = 1;
+    case MASTER = 2;
 
     public function getName(): string
     {
@@ -16,6 +16,15 @@ enum Rank implements JsonSerializable
             Rank::NOOB => "NOOB",
             Rank::ELITE => "ÉLITE",
             Rank::MASTER => "MAÎTRE DE GUERRE",
+        };
+    }
+
+    function getImageFromRank($width=""): string
+    {
+        return match($this) {
+            Rank::NOOB => "<img class='img-rank' width='$width' height='$width' src='assets/images/noob_yellow.png' alt='Noob' />",
+            Rank::ELITE => "<img class='img-rank' width='$width' height='$width' src='assets/images/elite_yellow.png' alt='Elite' />",
+            Rank::MASTER => "<img class='img-rank' width='$width' height='$width' src='assets/images/master_yellow.png' alt='MdG' />"
         };
     }
 

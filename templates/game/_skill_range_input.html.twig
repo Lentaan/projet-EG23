@@ -1,0 +1,16 @@
+<div>
+    <label for='{{ skill }}'>{{ skill_translate }}</label>
+    <p>
+        <span><span class='points'>{{ points }}</span>p</span>
+        <button type='button' class='btn-minus'><img width='20' src='{{ asset('assets/images/minus.svg') }}' alt='Minus'></button>
+        <input id='{{ skill }}'
+               class='form-range'
+               data-old='{{ points }}'
+               name='{{ skill }}'
+               value='{{ points }}'
+               type='range'
+               min='0'
+               max='{% if skill == 'constitution' %}30{% else %}10{% endif %}' />
+        <button type='button' class='btn-plus'><img width='20' src='{{ asset('assets/images/plus.svg') }}' alt='Plus'></button>
+    </p>
+</div>

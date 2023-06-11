@@ -2,6 +2,7 @@ doctrine:
     dbal:
         types:
             speciality: App\DoctrineType\SpecialityType
+            zone: App\DoctrineType\ZoneType
             rank: App\DoctrineType\RankType
             ai: App\DoctrineType\AiType
         url: '%env(resolve:DATABASE_URL)%'
