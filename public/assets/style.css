@@ -19,6 +19,15 @@
   70% { background-color: #2554D6 }
   100% { background-color: #0a53be; filter: brightness(100%); scale: 1 }
 }
+
+@keyframes fly-fade {
+  0% { translate: 0 0; opacity: 1; }
+  33% { translate: -5% -10%; opacity: 0.8  }
+  50% { translate: 5% -20%; opacity: 0.5 }
+  70% { translate: -5% -30%; opacity: 0.2 }
+  100% { translate: 5% -40%; opacity: 0 }
+}
+
 @keyframes color-card-active {
   0% { background-color: #0a53be; scale: 1.3 }
   33% { background-color: #2554D6; }
@@ -71,6 +80,12 @@
 @keyframes scale-appear {
   0% { scale: 0; }
   100% { scale: 1; }
+}
+
+@keyframes hurt {
+  0% { filter: none; }
+  50% { filter: sepia(100%) saturate(10); }
+  100% { filter: none; }
 }
 
 
@@ -753,6 +768,7 @@ footer {
   font-size: 1.2em;
   position: fixed;
   bottom: 0;
+  z-index: 10;
 }
 
 footer > div{
@@ -765,7 +781,7 @@ footer > div{
   font-size: 0.5em;
 }
 
-.battlefield > div p {
+.zone-texte {
   position: absolute;
   translate: -50% -50%;
   top: 50%;
@@ -774,7 +790,7 @@ footer > div{
   line-height: 2;
 }
 
-.battlefield > div {
+.battlefield > .zone {
   text-align: center;
   position: absolute;
   cursor: pointer;
@@ -930,4 +946,78 @@ input[type="checkbox"]{
   animation-name: rotate-scale-up-active;
   animation-fill-mode: both;
   animation-duration: 250ms;
+}
+
+
+.stats.hidden{
+  display: none;
+  position: absolute;
+  left: -450%;
+}
+
+.pawn {
+  position: absolute;
+  z-index: 5;
+}
+
+.pawn:hover {
+  z-index: 999;
+}
+
+.pawn:hover .stats.hidden{
+  display: flex;
+  background-color: #202C4D;
+  padding: 10px;
+  padding-left: 30px;
+  width: 370px;
+}
+
+.player1 img {
+  scale: -1 1;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 3px;
+  background-color: #FFD600;
+  margin-bottom: 2px;
+}
+
+.progress-bar .progress{
+  background-color: #E96E00;
+  height: 100%;
+}
+
+.player1 .progress{
+  background-color: #2554D6;
+}
+
+.pawn.effect::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-image: url("/assets/images/icon_heal.svg");
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 100;
+  left: 35%;
+  top: -15%;
+  animation: fly-fade 1s infinite ease;
+}
+
+.pawn.damage::before {
+  background-image: url("/assets/images/icon_damage.svg");
+}
+
+.pawn.escape::before {
+  background-image: url("/assets/images/icon_escape.svg");
+}
+
+.pawn.precision::before {
+  background-image: url("/assets/images/icon_precision.svg");
+}
+
+.pawn.shield::before {
+  background-image: url("/assets/images/icon_shield.svg");
 }

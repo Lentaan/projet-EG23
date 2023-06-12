@@ -12,7 +12,59 @@
             {% set isControlled = zoneControl.isControlled ? zoneControl.controllingPlayer.name == 'Player1' ? 'hi' : 'qa' : 'library' %}
             <div data-zone="{{ zoneControl.zone.name }}" data-name="{{ zoneControl.zone.value }}" class="{{ isControlled }} {{ zoneControl.zone.name }}_zone zone">
                 <img src="{{ asset('assets/images/'~isControlled~'.svg') }}" alt="{{ zoneControl.zone.value }}">
-                <p> {{ zoneControl.zone.value }} {% if not is_sim %}<br> <span class="nb-unite">{{ zoneControl.soldiersPlayer1.count }}</span> unités{% endif %}</p>
+                <p class="zone-texte"> {{ zoneControl.zone.value }} {% if not is_sim %}<br> <span class="nb-unite">{{ zoneControl.soldiersPlayer1.count }}</span> unités{% endif %}</p>
+                {% if is_sim %}
+                    <div class="player1">
+                        {% for soldier in zoneControl.soldiersPlayer1 %}
+                            <div class="pawn" style="top: {{ random(20,60) }}%; left: {{ random(20,60) }}%">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: {{ 100 * soldier.life / 60 }}%"></div>
+                                </div>
+                                <img width="40" alt="Soldat {{ loop.index }}" src="{{ asset('assets/images/'~soldier.rank.name|lower~'_yellow.svg') }}">
+                                <div class="stats hidden">
+                                    <h3>Ton soldat - Statistiques</h3>
+                                    {% for stat in stats %}
+                                        {{ include('game/_stat_line.html.twig', {'points': attribute(soldier, stat), 'stat': stat, 'stat_translate': stats_translate[stat]}) }}
+                                    {% endfor %}
+                                    <div>
+                                        <div class='stat-label'>
+                                            <img src='{{ asset("assets/images/upgrade_arrow.svg") }}' alt='{{ skills_translate['initiative'] }}' width='15'>
+                                            <p>{{ skills_translate['initiative'] }}</p>
+                                        </div>
+                                        <p>
+                                            <span class='initiative'>{{ soldier.initiative }}</span>p
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="player2">
+                        {% for soldier in zoneControl.soldiersPlayer2 %}
+                            <div class="pawn" style="bottom: {{ random(20,60) }}%; right: {{ random(20,60) }}%">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: {{ 100 * soldier.life / 60 }}%"></div>
+                                </div>
+                                <img width="40" alt="Soldat {{ loop.index }}" src="{{ asset('assets/images/'~soldier.rank.name|lower~'_orange.svg') }}">
+                                <div class="stats hidden">
+                                    <h3>Soldat adverse - Statistiques</h3>
+                                    {% for stat in stats %}
+                                        {{ include('game/_stat_line.html.twig', {'points': attribute(soldier, stat), 'stat': stat, 'stat_translate': stats_translate[stat]}) }}
+                                    {% endfor %}
+                                    <div>
+                                        <div class='stat-label'>
+                                            <img src='{{ asset("assets/images/upgrade_arrow.svg") }}' alt='{{ skills_translate['initiative'] }}' width='15'>
+                                            <p>{{ skills_translate['initiative'] }}</p>
+                                        </div>
+                                        <p>
+                                            <span class='initiative'>{{ soldier.initiative }}</span>p
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         {% endfor %}
     </section>
@@ -103,8 +155,10 @@
         const miniCards = document.querySelectorAll('.mini-card');
         let minus = 0;
         let btnValidate = document.getElementById('validate-battle');
+        const effect = ['damage', 'hurt', 'heal', 'escape', 'shield', 'precision']
+        let id = null
 
-        function activeCard(cardIndex) {
+            function activeCard(cardIndex) {
             let zone = dialogSoldier.dataset.zone
             let length = miniCards.length - minus
             let midLength = Math.ceil(length / 2);
@@ -244,6 +298,21 @@
                 if (!isInDialog) {
                     lobby.classList.add('fade-out');
                     setTimeout(() => lobby.close(), 200);
+                }
+            }
+
+            function move() {
+                let pawns = document.querySelectorAll('.pawn');
+                let id = setInterval(frame, 10);
+                function frame() {
+                    let randEffect = effect[Math.floor(Math.random() * effect.length)]
+                    if (width >= 100) {
+                        clearInterval(id);
+                    } else {
+                        width++;
+                        elem.style.width = width + '%';
+                        elem.innerHTML = width * 1  + '%';
+                    }
                 }
             }
 

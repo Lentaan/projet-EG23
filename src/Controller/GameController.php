@@ -183,7 +183,46 @@ class GameController extends AbstractController
         }
 
         if (isset($_GET['sim']) && $_GET['sim'] === '1') {
-
+            $zoneControls = $player->getGame()->getZoneControls();
+            $zoneControl = $zoneControls->first();
+            if ($zoneControl) {
+                $index = 0;
+                foreach ($player->getSoldiers() as $soldier) {
+                    if (!$soldier->isIsReserved()){
+                        if ($index % 3 === 0 && $index !== 0) {
+                            $zoneControl = $zoneControls->next();
+                        }
+                        if ($zoneControl) {
+                            $zoneControl->addSoldiersPlayer1($soldier);
+                            $index++;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        $soldier->setIsReserved(false);
+                        $entity_manager->persist($soldier);
+                    }
+                    $entity_manager->persist($zoneControl);
+                }
+                foreach ($player2->getSoldiers() as $soldier) {
+                    if (!$soldier->isIsReserved()){
+                        if ($index % 3 === 0 && $index !== 0) {
+                            $zoneControl = $zoneControls->next();
+                        }
+                        if ($zoneControl) {
+                            $zoneControl->addSoldiersPlayer2($soldier);
+                            $index++;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        $soldier->setIsReserved(false);
+                        $entity_manager->persist($soldier);
+                    }
+                    $entity_manager->persist($zoneControl);
+                }
+                $entity_manager->flush();
+            }
         }
 
         if (isset($_GET['mov']) && $_GET['mov'] === '2') {
@@ -285,7 +324,13 @@ class GameController extends AbstractController
             'soldiers' => $player->getSoldiers(),
             'nbSoldiers' => Game::MAX_SOLDIER - ( $player->getNbReservedSoldier() + $player->getGame()->getNbSoldiersPlaced() + $player->getNbDead()),
             'mov' => isset($_GET['mov']) ? $_GET['mov'] + 1 : (isset($_GET['sim']) ? $_GET['sim'] + 1 : 1),
-            'is_sim' => isset($_GET['sim'])
+            'is_sim' => isset($_GET['sim']),
+            'player1' => $player,
+            'player2' => $player2,
+            'skills' => self::SKILLS,
+            'stats' => self::STATS,
+            'skills_translate' => self::SKILLS_TRANSLATE,
+            'stats_translate' => self::STATS_TRANSLATE,
         ]);
     }
 }
