@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}War game à l'UTT{% endblock %}
+{% block nav %}
+    <a class="brand" href="{{ path('play') }}">
+        <img width="40" src="{{ asset('assets/images/logo.png') }}" alt="WGUTT">
+    </a>
+    <a href="{{ path('lobby_list') }}">Jouer</a>
+{% endblock %}
 
 {% block body %}
     <section class="start">

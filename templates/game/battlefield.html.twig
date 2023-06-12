@@ -4,7 +4,10 @@
 {% block nav_class %}other-nav{% endblock %}
 {% block nav %}
     <div class="first-nav">
-        {{ parent() }}
+        <a class="brand" href="{{ path('play') }}">
+            <img width="40" src="{{ asset('assets/images/logo.png') }}" alt="WGUTT">
+        </a>
+        <a href="{{ path('lobby_list') }}">Jouer</a>
     </div>
     {% if is_sim %}
         <p class="title-nav">WAR - SIMULATION DE BATAILLE EN COURS</p>
