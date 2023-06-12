@@ -970,6 +970,7 @@ input[type="checkbox"]{
   padding: 10px;
   padding-left: 30px;
   width: 370px;
+  border-radius: 10px;
 }
 
 .player1 img {
@@ -1007,17 +1008,32 @@ input[type="checkbox"]{
 }
 
 .pawn.damage::before {
-  background-image: url("/assets/images/icon_damage.svg");
+  background-image: url("/assets/images/icon_damage_2.svg");
 }
 
 .pawn.escape::before {
-  background-image: url("/assets/images/icon_escape.svg");
+  background-image: url("/assets/images/icon_escape_2.svg");
 }
 
 .pawn.precision::before {
-  background-image: url("/assets/images/icon_precision.svg");
+  background-image: url("/assets/images/icon_precision_2.svg");
 }
 
 .pawn.shield::before {
-  background-image: url("/assets/images/icon_shield.svg");
+  background-image: url("/assets/images/icon_shield_2.svg");
+}
+
+.title-nav {
+  width: 50%;
+  text-align: center;
+  align-self: center;
+}
+
+.first-nav {
+  display: flex;
+  gap: 5px
+}
+
+.other-nav {
+  justify-content: space-between;
 }

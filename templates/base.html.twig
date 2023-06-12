@@ -16,7 +16,7 @@
     {% endblock %}
 </head>
 <body>
-<nav>
+<nav class="{% block nav_class %}{% endblock %}">
     {% block nav %}
         <a class="brand" href="{{ path('play') }}">
             <img width="40" src="{{ asset('assets/images/logo.png') }}" alt="WGUTT">

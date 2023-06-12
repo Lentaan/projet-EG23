@@ -1,8 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{% endblock %}
+{% block title %}{% if is_sim %} WAR - SIMULATION DE BATAILLE EN COURS{% else %}WGUTT | Choisir ses zones{% endif %}{% endblock %}
+{% block nav_class %}other-nav{% endblock %}
 {% block nav %}
-    {{ parent() }}
+    <div class="first-nav">
+        {{ parent() }}
+    </div>
+    {% if is_sim %}
+        <p class="title-nav">WAR - SIMULATION DE BATAILLE EN COURS</p>
+    {% else %}
+        Il faut maintenant faire des choix stratégique
+    {% endif %}
     <a href="{{ path('lobby_list') }}">Abandonner</a>
 {% endblock %}
 
@@ -156,9 +164,9 @@
         let minus = 0;
         let btnValidate = document.getElementById('validate-battle');
         const effect = ['damage', 'hurt', 'heal', 'escape', 'shield', 'precision']
-        let id = null
+        let intervalId = null
 
-            function activeCard(cardIndex) {
+        function activeCard(cardIndex) {
             let zone = dialogSoldier.dataset.zone
             let length = miniCards.length - minus
             let midLength = Math.ceil(length / 2);
@@ -188,6 +196,53 @@
             })
         }
 
+        function animOpen(lobby) {
+            lobby.classList.add('fade-out');
+            lobby.showModal();
+            lobby.classList.add('fade-in');
+            lobby.classList.remove('fade-out');
+        }
+
+        function closeDialog(event, lobby) {
+            if (event.target.nodeName === "SELECT" || event.target.nodeName === "OPTION") {
+                return;
+            }
+            const rect = lobby.getBoundingClientRect();
+            const isInDialog=((rect.top <= event.clientY && event.clientY <= rect.top + rect.height
+                && rect.left <= event.clientX && event.clientX <= rect.left + rect.width) || event.target.nodeName === "SELECT");
+            if (!isInDialog) {
+                lobby.classList.add('fade-out');
+                setTimeout(() => lobby.close(), 200);
+            }
+        }
+
+        function move() {
+            let pawns = document.querySelectorAll('.pawn');
+            intervalId = setInterval(frame, 1000);
+            function frame() {
+                for(let pawn of pawns) {
+                    let randEffect = effect[Math.floor(Math.random() * effect.length)]
+                    let randPos = !!Math.floor(Math.random() * 2);
+                    let randMinus = !!Math.floor(Math.random() * 2);
+                    let num = Number(pawn.getElementsByClassName('life')[0].innerHTML.trim())
+                    if (num <= 0) {
+                        clearInterval(id);
+                    } else {
+                        if (randEffect === 'hurt') {
+                            pawn.getElementsByClassName('life')[0].innerHTML = num - 1;
+                            pawn.getElementsByClassName('progress')[0].style.width = 100 * (num - 1) / 60;
+                            pawn.getElementsByTagName('img')[0].classList.add('hurt')
+                        } else {
+                            pawn.classList.remove(...effect);
+                            pawn.classList.add('effect');
+                            pawn.classList.add(randEffect);
+                        }
+                        pawn.style[randPos? 'top' : 'left'] = randMinus ? - Math.floor(Math.random() * 100 + 20) : Math.floor(Math.random() * 100 + 20);
+                    }
+                }
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             miniCards.forEach(function (card) {
                 card.addEventListener('animationend', function (ev) {
@@ -195,6 +250,7 @@
                 })
             })
 
+            {% if not is_sim %}
             document.querySelector(".arrow-right").addEventListener('click', function () {
                 if (cardOffset < (20-minus)) {
                     cardOffset += 1;
@@ -256,10 +312,6 @@
                 nb.innerHTML = 0;
             })
 
-            btnValidate.addEventListener('click', function (el) {
-                window.location.href = el.currentTarget.dataset.url;
-            })
-
             dialogSoldier.classList.add('hidden');
             dialogSoldier.showModal();
             dialogSoldier.addEventListener('click', (event) => closeDialog(event, dialogSoldier) );
@@ -281,40 +333,15 @@
                 })
             })
 
-            function animOpen(lobby) {
-                lobby.classList.add('fade-out');
-                lobby.showModal();
-                lobby.classList.add('fade-in');
-                lobby.classList.remove('fade-out');
-            }
+            {% endif %}
 
-            function closeDialog(event, lobby) {
-                if (event.target.nodeName === "SELECT" || event.target.nodeName === "OPTION") {
-                    return;
-                }
-                const rect = lobby.getBoundingClientRect();
-                const isInDialog=((rect.top <= event.clientY && event.clientY <= rect.top + rect.height
-                    && rect.left <= event.clientX && event.clientX <= rect.left + rect.width) || event.target.nodeName === "SELECT");
-                if (!isInDialog) {
-                    lobby.classList.add('fade-out');
-                    setTimeout(() => lobby.close(), 200);
-                }
-            }
+            {% if is_sim %}
+                move()
+            {% endif %}
 
-            function move() {
-                let pawns = document.querySelectorAll('.pawn');
-                let id = setInterval(frame, 10);
-                function frame() {
-                    let randEffect = effect[Math.floor(Math.random() * effect.length)]
-                    if (width >= 100) {
-                        clearInterval(id);
-                    } else {
-                        width++;
-                        elem.style.width = width + '%';
-                        elem.innerHTML = width * 1  + '%';
-                    }
-                }
-            }
+            btnValidate.addEventListener('click', function (el) {
+                window.location.href = el.currentTarget.dataset.url;
+            })
 
         });
     </script>
