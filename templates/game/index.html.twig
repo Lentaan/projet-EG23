@@ -1,16 +1,20 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}{% endblock %}
+{% block nav_class %}other-nav{% endblock %}
 {% block nav %}
-    {{ parent() }}
-    <a href="{{ path('lobby_list') }}">Abandonner</a>
+    <div class="first-nav">
+        {{ parent() }}
+    </div>
+    <p class="title-nav">Que choisir entre personnalisation et équilibre ?</p>
+    <a href="{{ path('game_fail') }}">Abandonner</a>
 {% endblock %}
 
 {% block body %}
     <section>
         <form name="soldier">
             <div class="card">
-                <h2><button><img width='30' alt='Upgrade' src='{{ asset('assets/images/upgrade_arrow.svg') }}'></button> {{ rank_name }} (+<span class='points'>{{ first_soldier.totalPoints }}</span>p)</h2>
+                <h2><button class="upgrade"><img width='30' alt='Upgrade' src='{{ asset('assets/images/upgrade_arrow.svg') }}'></button> {{ rank_name }} (+<span class='points'>{{ first_soldier.totalPoints }}</span>p)</h2>
                 <img class="img-rank" src="{{ asset('assets/images/'~first_soldier.rank.name|lower~'_yellow.png') }}" alt="Noob" width="" height="">
                 <div class="select-group ai">
                     <select name="ai">
@@ -193,6 +197,13 @@
                 }
             })
 
+            document.querySelector(".arrow-left").addEventListener('click', function () {
+                if (cardOffset <= (length - 3) / 2) {
+                    cardOffset += 1;
+                    activeCard(cardOffset);
+                }
+            })
+
             document.querySelector(".arrow-right").addEventListener('click', function () {
                 if (cardOffset >= -((length - 1) / 2)) {
                     cardOffset -= 1;
@@ -288,6 +299,8 @@
             })
 
         });
+
+
 
     </script>
 {% endblock %}

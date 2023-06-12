@@ -854,7 +854,7 @@ footer > div{
   justify-content: center;
 }
 
-#slider-soldiers section.soldier-action {
+.soldier-action {
   flex-direction: column;
   color: #FFD600;
   text-align: center;
@@ -1021,6 +1021,10 @@ input[type="checkbox"]{
 
 .pawn.shield::before {
   background-image: url("/assets/images/icon_shield_2.svg");
+}
+
+.pawn.hurt img {
+  animation: hurt 1s infinite ease-in-out;
 }
 
 .title-nav {

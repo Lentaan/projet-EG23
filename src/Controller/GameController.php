@@ -91,6 +91,20 @@ class GameController extends AbstractController
         ]);
     }
 
+    #[Route('/abandon', name: 'fail')]
+    public function fail(SoldierRepository $soldier_repository,
+        ZoneControlRepository $zone_control_repository,
+        PlayerRepository $player_repository,
+        GameRepository $game_repository
+    ): Response
+    {
+        $soldier_repository->removeAll();
+        $zone_control_repository->removeAll();
+        $player_repository->removeAll();
+        $game_repository->removeAll();
+        return $this->redirectToRoute('lobby_list');
+    }
+
     #[Route('/creer-une-partie', name: 'create')]
     public function create(EntityManagerInterface $entity_manager): Response
     {
@@ -261,7 +275,7 @@ class GameController extends AbstractController
 
         }
 
-        if (isset($_GET['mov']) && $_GET['mov'] === '3') {
+        if (isset($_GET['mov']) && $_GET['mov'] === '4') {
             $zoneControls = $player->getGame()->getNoSoldierZones($player);
             $soldiers = $player->getNoZonesSoldiers();
             $soldier = $soldiers->first();
@@ -284,32 +298,32 @@ class GameController extends AbstractController
             }
         }
 
-        if (isset($_GET['mov']) && $_GET['mov'] === '4') {
-            $zoneControls = $player->getGame()->getUncontrolledZones($player);
-            /* @var ZoneControl $zoneControl */
-            $zoneControl = $zoneControls->first();
-            if($zoneControl){
-                $zoneControl->setIsControlled(true);
-                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
-                $entity_manager->persist($zoneControl);
-                $entity_manager->flush();
-            }
-        }
-
-        if (isset($_GET['mov']) && $_GET['mov'] === '5') {
-            $zoneControls = $player->getGame()->getUncontrolledZones($player);
-            /* @var ZoneControl $zoneControl */
-            $zoneControl = $zoneControls->first();
-            if($zoneControl){
-                $zoneControl->setIsControlled(true);
-                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
-                $entity_manager->persist($zoneControl);
-                $entity_manager->flush();
-            }
-
-        }
-
         if (isset($_GET['mov']) && $_GET['mov'] === '6') {
+            $zoneControls = $player->getGame()->getUncontrolledZones($player);
+            /* @var ZoneControl $zoneControl */
+            $zoneControl = $zoneControls->first();
+            if($zoneControl){
+                $zoneControl->setIsControlled(true);
+                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
+                $entity_manager->persist($zoneControl);
+                $entity_manager->flush();
+            }
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '8') {
+            $zoneControls = $player->getGame()->getUncontrolledZones($player);
+            /* @var ZoneControl $zoneControl */
+            $zoneControl = $zoneControls->first();
+            if($zoneControl){
+                $zoneControl->setIsControlled(true);
+                $zoneControl->setControllingPlayer($player->getGame()->getPlayers()->last());
+                $entity_manager->persist($zoneControl);
+                $entity_manager->flush();
+            }
+
+        }
+
+        if (isset($_GET['mov']) && $_GET['mov'] === '10') {
             $soldier_repository->removeAll();
             $zone_control_repository->removeAll();
             $player_repository->removeAll();

@@ -9,9 +9,9 @@
     {% if is_sim %}
         <p class="title-nav">WAR - SIMULATION DE BATAILLE EN COURS</p>
     {% else %}
-        Il faut maintenant faire des choix stratégique
+        <p class="title-nav">Des choix stratégiques s'impose, camarade !</p>
     {% endif %}
-    <a href="{{ path('lobby_list') }}">Abandonner</a>
+    <a href="{{ path('game_fail') }}">Abandonner</a>
 {% endblock %}
 
 {% block body %}
@@ -76,6 +76,67 @@
             </div>
         {% endfor %}
     </section>
+    {% if is_sim and mov == 2 %}
+        <dialog id="dialog-win" class="modal">
+        <header class="title-modal">
+            <h1>Félicitation ! Vous avez gagné le BDE</h1>
+        </header>
+        <section class="soldier-action">
+            <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
+                Passez au tour suivant !
+            </button>
+        </section>
+        </dialog>
+    {% endif %}
+    {% if is_sim and mov == 4 %}
+        <dialog id="dialog-win" class="modal">
+        <header class="title-modal">
+            <h1>Félicitation ! Vous avez gagné la Halle Sportive</h1>
+        </header>
+        <section class="soldier-action">
+            <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
+                Passez au tour suivant !
+            </button>
+        </section>
+        </dialog>
+    {% endif %}
+    {% if is_sim and mov == 6 %}
+        <dialog id="dialog-win" class="modal">
+        <header class="title-modal">
+            <h1>Dommage ! Vous avez perdu le Quartier Administratif</h1>
+        </header>
+        <section class="soldier-action">
+            <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
+                Passez au tour suivant !
+            </button>
+        </section>
+        </dialog>
+    {% endif %}
+    {% if is_sim and mov == 8 %}
+        <dialog id="dialog-win" class="modal">
+        <header class="title-modal">
+            <h1>Dommage ! Vous avez perdu la Bibliothèque</h1>
+        </header>
+        <section class="soldier-action">
+            <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
+                Passez au tour suivant !
+            </button>
+        </section>
+        </dialog>
+    {% endif %}
+    {% if is_sim and mov == 10 %}
+        <dialog id="dialog-win" class="modal">
+        <header class="title-modal">
+            <h1>Félicitation ! Vous avez gagné les Halles Industrielle</h1>
+        </header>
+        <section class="soldier-action">
+            <p>Nous vous félicitons d'avoir bravé tous les obstacles ! </p>
+            <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
+                Fin de partie
+            </button>
+        </section>
+        </dialog>
+    {% endif %}
     {% if not is_sim %}
     <dialog id="slider-soldiers" class="modal">
         <header class="title-modal">
@@ -147,7 +208,7 @@
             Valider le plan de bataille
         </button>
         {% else %}
-        <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Passer l'animation" class="btn-create">
+        <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="skip" title="Passer l'animation" class="btn-create">
             Passer
         </button>
         {% endif %}
@@ -155,18 +216,20 @@
     <script>
         let zones = document.getElementsByClassName('zone');
         let dialogSoldier = document.getElementById('slider-soldiers');
+        let dialogWin = document.getElementById('dialog-win');
         let btnDialogSoldier = document.getElementById('assign-soldiers');
-
-        const radiusX = document.body.offsetWidth / 2;
-        const radiusY = document.body.offsetHeight / 2;
         let cardOffset = 2;
         const miniCards = document.querySelectorAll('.mini-card');
         let minus = 0;
         let btnValidate = document.getElementById('validate-battle');
+        let btnSkip = document.getElementById('skip');
         const effect = ['damage', 'hurt', 'heal', 'escape', 'shield', 'precision']
         let intervalId = null
 
         function activeCard(cardIndex) {
+            const slider = document.getElementsByClassName('slider')[0]
+            const radiusX = slider.offsetWidth / 2 - 100
+            const radiusY = slider.offsetHeight / 2 - 100
             let zone = dialogSoldier.dataset.zone
             let length = miniCards.length - minus
             let midLength = Math.ceil(length / 2);
@@ -187,8 +250,8 @@
                     card.style.zIndex = index;
                     let bright = 100 - length * 3 + index * 10;
                     card.style.setProperty("--slider--brightness", ((bright >= 20) ? bright : 20) + "%");
-                    card.style.setProperty("--slider--left", (Math.round((radiusX - 550 + length * 10) * Math.cos(deg * (Math.PI / 180))) + 550 - length * 10) + "px");
-                    card.style.setProperty("--slider--top", (Math.round((radiusY * 0.8 - 350) * Math.sin(deg * (Math.PI / 180))) ) + "px");
+                    card.style.setProperty("--slider--left", (Math.round(radiusX * Math.cos(deg * (Math.PI / 180))) + radiusX - card.offsetWidth / 2 + 100) + "px");
+                    card.style.setProperty("--slider--top", (Math.round(radiusY * Math.sin(deg * (Math.PI / 180))) + radiusY - card.offsetHeight / 2 + 50) + "px");
                 } else {
                     minusNon++;
                 }
@@ -226,12 +289,14 @@
                     let randMinus = !!Math.floor(Math.random() * 2);
                     let num = Number(pawn.getElementsByClassName('life')[0].innerHTML.trim())
                     if (num <= 0) {
-                        clearInterval(id);
+                        clearInterval(intervalId);
+
                     } else {
                         if (randEffect === 'hurt') {
+                            pawn.classList.remove(...effect, 'effect');
+                            pawn.classList.add('hurt');
                             pawn.getElementsByClassName('life')[0].innerHTML = num - 1;
-                            pawn.getElementsByClassName('progress')[0].style.width = 100 * (num - 1) / 60;
-                            pawn.getElementsByTagName('img')[0].classList.add('hurt')
+                            pawn.getElementsByClassName('progress')[0].style.width = (100 * (num - 1) / 60) + '%';
                         } else {
                             pawn.classList.remove(...effect);
                             pawn.classList.add('effect');
@@ -242,6 +307,8 @@
                 }
             }
         }
+
+
 
         document.addEventListener("DOMContentLoaded", () => {
             miniCards.forEach(function (card) {
@@ -341,6 +408,10 @@
 
             btnValidate.addEventListener('click', function (el) {
                 window.location.href = el.currentTarget.dataset.url;
+            })
+
+            btnSkip.addEventListener('click', function (el) {
+                animOpen(dialogWin);
             })
 
         });
