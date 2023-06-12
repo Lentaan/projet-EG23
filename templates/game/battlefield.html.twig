@@ -9,7 +9,7 @@
     {% if is_sim %}
         <p class="title-nav">WAR - SIMULATION DE BATAILLE EN COURS</p>
     {% else %}
-        <p class="title-nav">Des choix stratégiques s'impose, camarade !</p>
+        <p class="title-nav">Des choix stratégiques s'imposent, camarade !</p>
     {% endif %}
     <a href="{{ path('game_fail') }}">Abandonner</a>
 {% endblock %}
@@ -174,6 +174,26 @@
         </section>
     </dialog>
     {% endif %}
+     <dialog id="aide">
+            <header >
+                <h1 style="position:relative; text-align: center; left: -25px; font-size: 45px"> Aide - Choix des unités</h1>
+                <h4 id="close-dialog-aide">
+                    X
+                </h4>
+            </header>
+            <div>
+                <p style="color: #FFF1A5; top: 200px;"> Maintenant que vous avez constitué votre équipe d'<strong>unités</strong> vous devez maintenant combattre ! 
+                    <br>Commencer par cliquer sur une <strong> zone </strong> afin d'y affecter vos <strong>unités </strong>
+                    <br> <br>Attention : il faut affecter au moins une <strong>unité</strong> par <strong>zone</strong> !
+                    <br> 
+                    <br>Une fois que vous avez choisi vos <strong>unités</strong>, vous pouvez maintenant valider le <strong> plan de bataille</strong> afin de lancer les hostilités.
+                    <br> Le premier joueur à contrôler 3 <strong>zones</strong> gagne ! 
+                </p>
+               
+    
+            </div>
+        </dialog>
+
     <footer>
         {% if not is_sim %}
         <div>
@@ -416,5 +436,17 @@
             })
 
         });
+        popupAide = document.getElementById("open-dialog-aide");
+        popupTest = document.getElementById("idHelp");
+        afficherAide = document.getElementById("aide");
+        fermerAide = document.getElementById("close-dialog-aide");
+
+        popupAide.addEventListener('click', function(){
+            afficherAide.showModal();
+        })
+        fermerAide.addEventListener('click', function(){
+            afficherAide.close();
+        })
+    
     </script>
 {% endblock %}

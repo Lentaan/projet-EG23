@@ -331,7 +331,7 @@ class GameController extends AbstractController
             return $this->redirectToRoute('win');
         }
 
-
+        $id = "open-dialog-aide";
         return $this->render('game/battlefield.html.twig', [
             'controller_name' => 'GameController',
             'game' => $player->getGame(),
@@ -345,6 +345,8 @@ class GameController extends AbstractController
             'stats' => self::STATS,
             'skills_translate' => self::SKILLS_TRANSLATE,
             'stats_translate' => self::STATS_TRANSLATE,
+            'idHelp' => $id, 
+
         ]);
     }
 }
