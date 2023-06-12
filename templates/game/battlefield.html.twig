@@ -103,7 +103,7 @@
     {% if is_sim and mov == 6 %}
         <dialog id="dialog-win" class="modal">
         <header class="title-modal">
-            <h1>Dommage ! Vous avez perdu le Quartier Administratif</h1>
+            <h1>Dommage ! Vous avez perdu la Bibliothèque</h1>
         </header>
         <section class="soldier-action">
             <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
@@ -115,7 +115,7 @@
     {% if is_sim and mov == 8 %}
         <dialog id="dialog-win" class="modal">
         <header class="title-modal">
-            <h1>Dommage ! Vous avez perdu la Bibliothèque</h1>
+            <h1>Dommage ! Vous avez perdu le Quartier Administratif</h1>
         </header>
         <section class="soldier-action">
             <button data-url="{{ path('game_battlefield', {'mov': mov}) }}" id="validate-battle" title="Tour suivant" class="btn-create">
@@ -144,6 +144,7 @@
         </header>
         <section class="soldier-action">
             <p><span class="nb-in-zone">0</span> soldats ont été sélectionnés !</p>
+            <p class="help">(pour sélectionner un soldat, cliquer sur la carte active centrale, elle s'illuminera)</p>
             <button id="assign-soldiers" class="btn-create">Affecter !</button>
         </section>
         <section>

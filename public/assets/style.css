@@ -854,14 +854,6 @@ footer > div{
   justify-content: center;
 }
 
-.soldier-action {
-  flex-direction: column;
-  color: #FFD600;
-  text-align: center;
-  align-items: center;
-  gap: 20px
-}
-
 input[type="checkbox"]{
   position: absolute;
   opacity: 0;
@@ -1041,3 +1033,17 @@ input[type="checkbox"]{
 .other-nav {
   justify-content: space-between;
 }
+
+.soldier-action {
+  flex-direction: column !important;
+  color: #FFD600;
+  text-align: center;
+  align-items: center;
+  gap: 20px
+}
+
+.help {
+  color: #FFF1A5;
+  font-size: .6em;
+}
+
